@@ -28,5 +28,4 @@ public class AuthenticationToken {
         this.token = UUID.randomUUID().toString();
     }
 
-
 }

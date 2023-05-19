@@ -11,9 +11,12 @@ import com.geekster.InstagramApplication.Repositary.UserRepo;
 import jakarta.xml.bind.DatatypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class UserService {
@@ -108,5 +111,63 @@ public class UserService {
         user1.setUserFirstName(user.getUserFirstName());
         user1.setUserLastName(user.getUserLastName());
 
+    }
+
+    public void updateUser(User user, String token) {
+        User user1 = tokenRepo.findFirstByToken(token).getUser();
+        if ( user.getUserFirstName() != null) {
+            user1.setUserFirstName(user.getUserFirstName());
+        }
+        if ( user.getUserLastName() != null) {
+            user1.setUserLastName(user.getUserLastName());
+        }
+        if ( user.getUserEmail() != null) {
+            Pattern p = Pattern.compile("[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}");
+
+            Matcher m = p.matcher(user.getUserEmail());
+            if( (m.find() && m.group().equals(user.getUserEmail()))){
+                user1.setUserEmail(user.getUserEmail());
+
+            }else{
+                throw new IllegalStateException("Enter correct details");
+            }
+//            user1.setEmail(user.getEmail());
+        }
+        if ( user.getUserAge() != null ) {
+            user1.setUserAge(user.getUserAge());
+        }
+        if( user.getUserPhoneNumber() != null){
+            Pattern p = Pattern.compile("\\d{2}-\\d{10}");
+
+            Matcher m = p.matcher(user.getUserPhoneNumber());
+            if( (m.find() && m.group().equals(user.getUserPhoneNumber()))){
+                user1.setUserPhoneNumber(user.getUserPhoneNumber());
+
+            }else{
+                throw new IllegalStateException("Enter correct details");
+            }
+
+        }
+
+        if ( user.getUserPassword() != null) {
+            String encryptedPassword = null;
+            try {
+                encryptedPassword = encryptPassword(user.getUserPassword());
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+            user1.setUserPassword(encryptedPassword);
+        }
+        userRepo.save(user1);
+    }
+
+    @Transactional
+    public String followUser(Long myId, Long otherId) {
+        if(myId==otherId){
+            return "Cant follow Yourself...!!"
+        }
+        else {
+
+        }
     }
 }
